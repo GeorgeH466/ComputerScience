@@ -1,0 +1,60 @@
+import tkinter as tk
+from tkcalendar import Calendar
+import mysql.connector
+from datetime import datetime
+
+
+def get_the_dates_for_calendar():
+    #creates the connection to the database
+    connection = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="hello",
+        database="project"
+    )
+    cursor = connection.cursor()
+#collects the outstanding invoice's deadlines from the database
+    cursor.execute("SELECT invoice_deadline FROM invoice")
+    results = cursor.fetchall()
+
+    cursor.close()
+    connection.close()
+#formats the dates so that they can be used properly
+    dates = []
+    for row in results:
+        if isinstance(row[0], datetime):
+            dates.append(row[0].date())
+        else:
+            dates.append(datetime.strptime(row[0], "%Y-%m-%d").date())
+#allows the use of the dates outside of the function
+    return dates
+
+
+def open_the_calendar_window():
+    invoice_dates = get_the_dates_for_calendar()
+
+    calendar_window = tk.Toplevel()
+    calendar_window.title("Scheduling Calendar")
+    calendar_window.geometry("400x400")
+
+    # Create calendar widget
+    cal = Calendar(
+        calendar_window,
+        selectmode="day",
+        year=datetime.now().year,
+        month=datetime.now().month,
+        day=datetime.now().day,
+        date_pattern="yyyy-mm-dd"
+    )
+    cal.pack(pady=20)
+
+    # makes the invoices visible in the calendar
+    for d in invoice_dates:
+        cal.calevent_create(d, "Invoice Due", "due")
+
+    # Styles the highlighted dates to different colour to the rest
+    cal.tag_config("due", background="red", foreground="white")
+
+if __name__ == "__main__":
+    open_the_calendar_window()
+    get_the_dates_for_calendar()
