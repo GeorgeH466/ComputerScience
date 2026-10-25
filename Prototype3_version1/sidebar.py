@@ -4,6 +4,7 @@ import data_viewer
 from calendar_creator import open_the_calendar_window
 import spreadsheet
 from notifications import scan_for_notifications
+from datetime import datetime
 
 
 #makes it so that the results variables exist before anything is done to make them able to be used but are all null.
@@ -109,7 +110,81 @@ def data_viewer_creator():#opens the data viewer sections
 
     tkinter.Label( system_section, text="\n".join([str(row) for row in data_viewer.system_result]), bg="#343434", fg="white", font=("Arial", 12), justify="left", wraplength=400).pack(anchor="w", padx=10, pady=10)
 
+def open_schedule():
+    # Open the existing calendar
+    open_the_calendar_window()
 
+    # Create a window for adding an event
+    add_window = tkinter.Toplevel(root)
+    add_window.title("Add Schedule Event")
+    add_window.geometry("400x400")
+    add_window.resizable(False, False)
+
+    # Title
+    tkinter.Label(add_window,text="Add New Event",font=("Arial", 20, "bold")).pack(pady=20)
+
+    # Customer ID
+    tkinter.Label(add_window,text="Customer ID:",font=("Arial", 14)).pack(pady=(10, 5))
+
+    customer_entry = tkinter.Entry(add_window,font=("Arial", 14))
+    customer_entry.pack()
+
+    # Date
+    tkinter.Label(add_window,text="Date (YYYY-MM-DD):",font=("Arial", 14)).pack(pady=(10, 5))
+
+    date_entry = tkinter.Entry(add_window,font=("Arial", 14))
+    date_entry.pack()
+
+    # Time
+    tkinter.Label(add_window,text="Time (HH:MM:SS):",font=("Arial", 14)).pack(pady=(10, 5))
+
+    time_entry = tkinter.Entry(add_window,font=("Arial", 14))
+    time_entry.pack()
+
+    # Event type
+    tkinter.Label(add_window,text="Event Type:", font=("Arial", 14)).pack(pady=(10, 5))
+
+    type_entry = tkinter.Entry(add_window, font=("Arial", 14))
+    type_entry.pack()
+
+    # Result message
+    result_label = tkinter.Label(add_window, text="", font=("Arial", 12))
+    result_label.pack(pady=10)
+
+    def save_schedule_event():
+        from scheduling_algorithm import add_event
+        try:
+            customer = int(customer_entry.get())
+
+            event_date = datetime.strptime(date_entry.get(),"%Y-%m-%d").date()
+
+            event_time = datetime.strptime(time_entry.get(),"%H:%M:%S").time()
+
+            event_type = type_entry.get()
+
+            new_event = {
+                "customer": customer,
+                "date": event_date,
+                "time": event_time,
+                "type": event_type}
+
+            result = add_event(new_event)
+
+            if result["status"] == "saved":
+                result_label.config(
+                    text="Event successfully added!", fg="green")
+
+            elif result["status"] == "clash":
+                clashing_event = result["clashing_event"]
+
+                result_label.config(
+                    text=("CLASH!\n" f"Existing event: {clashing_event['Event_type']}\n" f"Date: {clashing_event['Event_Date']}\n" f"Time: {clashing_event['Event_Time']}"),fg="red")
+
+        except ValueError:
+            result_label.config(text="Please check your date, time and customer ID.", fg="red")
+
+    # Save button
+    tkinter.Button(add_window, text="Add Event", font=("Arial", 14), command=save_schedule_event).pack(pady=10)
 
 
 def open_notification_center():
@@ -193,7 +268,7 @@ def create_sidebar():
     sidebar.pack_propagate(False)
 
     #organises and populates the sidebar
-    schedule_button = tkinter.Button(sidebar, text="schedule", font=("Arial", 20), command= open_the_calendar_window)
+    schedule_button = tkinter.Button(sidebar, text="schedule", font=("Arial", 20), command = open_schedule)
     schedule_button.pack(pady=30, fill="x")
 
     invoice_button = tkinter.Button(sidebar, text="invoice", font=("Arial", 20), command = do_get_data_for_invoice)
