@@ -117,7 +117,7 @@ def open_schedule():
     # Create a window for adding an event
     add_window = tkinter.Toplevel(root)
     add_window.title("Add Schedule Event")
-    add_window.geometry("400x400")
+    add_window.geometry("400x520")
     add_window.resizable(False, False)
 
     # Title
