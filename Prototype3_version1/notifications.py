@@ -115,4 +115,4 @@ def scan_for_notifications():
     events = fetch_event_notifications()
     payments = fetch_payment_notifications()
 
-    return invoices + events + payments
+    return invoices +  payments + events
