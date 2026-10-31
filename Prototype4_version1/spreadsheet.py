@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
+from openpyxl import Workbook
 
 def customer_amount_for_spreadsheet():#creates the spreadsheet popup box
     number_input_popup = tk.Toplevel()
@@ -22,3 +23,37 @@ def customer_amount_for_spreadsheet():#creates the spreadsheet popup box
             messagebox.showerror("Invalid Input", "Please enter a valid number")
 
     tk.Button(number_input_popup, text="Confirm", command=confirm).pack(pady=10)#makes it so the confirm button is there to press
+
+
+
+
+def write_spreadsheet(amount):
+    # Get the first 'amount' customers from the database
+    customers = get_first_customers(amount)
+
+    # Create a new Excel spreadsheet
+    workbook = Workbook()
+    worksheet = workbook.active
+    worksheet.title = "Customers"
+
+    # Add column headings
+    worksheet.append([
+        "Customer ID",
+        "Name",
+        "Address",
+        "Email",
+        "Phone"
+    ])
+
+    # Add each customer's data to the spreadsheet
+    for customer in customers:
+        worksheet.append([
+            customer["id"],
+            customer["name"],
+            customer["address"],
+            customer["email"],
+            customer["phone"]
+        ])
+
+    # Save the spreadsheet
+    workbook.save("customer_export.xlsx")
